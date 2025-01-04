@@ -11,7 +11,6 @@ import java.util.concurrent.Callable;
 
 @NullMarked
 public class ComplexBarChart extends Chart<Map<String, Number[]>> {
-
     public ComplexBarChart(String id, Callable<@Nullable Map<String, Number[]>> callable) {
         super(id, callable);
     }

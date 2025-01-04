@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 
 @NullMarked
 public class SimplePieChart extends Chart<String> {
-
     public SimplePieChart(String id, Callable<@Nullable String> callable) {
         super(id, callable);
     }

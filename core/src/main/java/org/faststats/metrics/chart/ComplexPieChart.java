@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 
 @NullMarked
 public class ComplexPieChart extends Chart<Map<String, Number>> {
-
     public ComplexPieChart(String id, Callable<@Nullable Map<String, Number>> callable) {
         super(id, callable);
     }
