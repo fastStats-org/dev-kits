@@ -1,5 +1,7 @@
 package org.faststats;
 
+import org.faststats.chart.SimplePieChart;
+import org.faststats.chart.SingleLineChart;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.UUID;
@@ -12,6 +14,11 @@ public class TestMetrics extends Metrics {
 
     public TestMetrics(UUID consumerId, boolean enabled, int projectId) {
         super(consumerId, enabled, projectId);
+        addChart(new SimplePieChart("onlineMode", () -> String.valueOf(true)));
+        addChart(new SimplePieChart("pluginVersion", () -> "0.1.0"));
+        addChart(new SimplePieChart("serverType", () -> "Paper"));
+        addChart(new SimplePieChart("serverVersion", () -> "1.21.4"));
+        addChart(new SingleLineChart("playerAmount", () -> 52));
     }
 
     @Override
