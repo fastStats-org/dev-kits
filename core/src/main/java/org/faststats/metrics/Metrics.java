@@ -56,7 +56,7 @@ public abstract class Metrics {
                     .build();
             httpClient.send(request, null);
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            error("Failed to submit metrics", e);
         }
     }
 
@@ -84,12 +84,14 @@ public abstract class Metrics {
             try {
                 charts.add(chart.getData());
             } catch (Exception e) {
-                e.printStackTrace(); // todo: proper logging
+                error("Failed to build chart data: " + chart.getId(), e);
             }
         });
         data.add("charts", charts);
         return data;
     }
+
+    protected abstract void error(String message, Throwable throwable);
 
     public void shutdown() {
         executor.shutdown();

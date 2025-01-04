@@ -5,6 +5,7 @@ import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.UUID;
+import java.util.logging.Level;
 
 @NullMarked
 public class BukkitMetrics extends Metrics {
@@ -25,5 +26,10 @@ public class BukkitMetrics extends Metrics {
         data.addProperty("serverName", plugin.getServer().getName());
         data.addProperty("serverVersion", plugin.getServer().getMinecraftVersion());
         return data;
+    }
+
+    @Override
+    protected void error(String message, Throwable throwable) {
+        plugin.getLogger().log(Level.SEVERE, message, throwable);
     }
 }

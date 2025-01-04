@@ -28,6 +28,10 @@ public abstract class Chart<T> {
         return object;
     }
 
+    public String getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "Chart{" +
