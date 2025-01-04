@@ -53,15 +53,14 @@ public abstract class Metrics {
             var data = compressData(createData());
             var request = HttpRequest.newBuilder()
                     .POST(HttpRequest.BodyPublishers.ofByteArray(data))
-                    .expectContinue(false)
                     .header("Content-Encoding", "gzip")
                     .header("Content-Type", "application/json")
                     .header("User-Agent", "fastStats Metrics")
                     .timeout(Duration.ofSeconds(1))
                     .uri(URI.create(getURL()))
                     .build();
-            httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-        } catch (IOException | InterruptedException e) {
+            httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding());
+        } catch (IOException e) {
             error("Failed to submit metrics", e);
         }
     }
