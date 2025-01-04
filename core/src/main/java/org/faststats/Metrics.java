@@ -59,8 +59,8 @@ public abstract class Metrics {
                     .timeout(Duration.ofSeconds(1))
                     .uri(URI.create(getURL()))
                     .build();
-            httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding());
-        } catch (IOException e) {
+            httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+        } catch (IOException | InterruptedException e) {
             error("Failed to submit metrics", e);
         }
     }
