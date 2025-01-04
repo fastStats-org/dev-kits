@@ -23,7 +23,6 @@ import java.util.zip.GZIPOutputStream;
 
 @NullMarked
 public abstract class Metrics {
-    private static final String URL = "https://api.faststats.org/v1/";
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(3))
             .build();
@@ -59,7 +58,7 @@ public abstract class Metrics {
                     .header("Content-Type", "application/json")
                     .header("User-Agent", "fastStats Metrics")
                     .timeout(Duration.ofSeconds(1))
-                    .uri(URI.create(URL))
+                    .uri(URI.create(getURL()))
                     .build();
             httpClient.send(request, HttpResponse.BodyHandlers.discarding());
         } catch (IOException | InterruptedException e) {
@@ -96,6 +95,10 @@ public abstract class Metrics {
         });
         data.add("charts", charts);
         return data;
+    }
+
+    protected String getURL() {
+        return "https://api.faststats.org/v1/metrics";
     }
 
     protected abstract void error(String message, Throwable throwable);
