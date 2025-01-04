@@ -21,7 +21,7 @@ public class TestMetrics extends Metrics {
 
     @Override
     protected String getURL() {
-        return "localhost:3000/metrics";
+        return "http://localhost:3000/metrics";
     }
 
     public static void main(String[] args) {
