@@ -92,7 +92,7 @@ public abstract class Metrics {
                 error("Failed to build chart data: " + chart.getId(), e);
             }
         });
-        data.add("charts", charts);
+        if (!charts.isEmpty()) data.add("charts", charts);
         return data;
     }
 
