@@ -1,7 +1,8 @@
 package org.faststats;
 
-import com.google.gson.JsonObject;
 import org.bukkit.plugin.Plugin;
+import org.faststats.chart.SimplePieChart;
+import org.faststats.chart.SingleLineChart;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.UUID;
@@ -11,21 +12,15 @@ import java.util.logging.Level;
 public class BukkitMetrics extends Metrics {
     private final Plugin plugin;
 
+    @SuppressWarnings("deprecation")
     public BukkitMetrics(Plugin plugin, int projectId) {
         super(UUID.randomUUID() /* todo: faststats save file*/, true, projectId);
+        addChart(new SimplePieChart("onlineMode", () -> String.valueOf(plugin.getServer().getOnlineMode())));
+        addChart(new SimplePieChart("pluginVersion", () -> plugin.getDescription().getVersion()));
+        addChart(new SimplePieChart("serverType", () -> plugin.getServer().getName()));
+        addChart(new SimplePieChart("serverVersion", () -> plugin.getServer().getMinecraftVersion()));
+        addChart(new SingleLineChart("playerAmount", () -> plugin.getServer().getOnlinePlayers().size()));
         this.plugin = plugin;
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    protected JsonObject createData() {
-        var data = super.createData();
-        data.addProperty("onlineMode", plugin.getServer().getOnlineMode() ? 1 : 0);
-        data.addProperty("playerAmount", plugin.getServer().getOnlinePlayers().size());
-        data.addProperty("pluginVersion", plugin.getDescription().getVersion());
-        data.addProperty("serverName", plugin.getServer().getName());
-        data.addProperty("serverVersion", plugin.getServer().getMinecraftVersion());
-        return data;
     }
 
     @Override
