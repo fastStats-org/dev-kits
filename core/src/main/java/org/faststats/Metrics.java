@@ -73,7 +73,7 @@ public abstract class Metrics {
         return output.toByteArray();
     }
 
-    protected JsonObject createData() {
+    private JsonObject createData() {
         var data = new JsonObject();
         data.addProperty("consumerId", consumerId.toString());
         data.addProperty("projectId", projectId);
