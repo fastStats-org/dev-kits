@@ -66,11 +66,11 @@ public abstract class Metrics {
     }
 
     private byte[] compressData(JsonObject data) throws IOException {
-        try (var output = new ByteArrayOutputStream();
-             var gzip = new GZIPOutputStream(output)) {
+        var output = new ByteArrayOutputStream();
+        try (var gzip = new GZIPOutputStream(output)) {
             gzip.write(data.toString().getBytes(StandardCharsets.UTF_8));
-            return output.toByteArray();
         }
+        return output.toByteArray();
     }
 
     protected JsonObject createData() {
