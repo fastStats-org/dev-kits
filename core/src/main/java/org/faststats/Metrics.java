@@ -7,9 +7,12 @@ import org.jspecify.annotations.NullMarked;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -21,7 +24,9 @@ import java.util.zip.GZIPOutputStream;
 @NullMarked
 public abstract class Metrics {
     private static final String URL = "https://api.faststats.org/v1/";
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(3))
+            .build();
     private final Set<Chart<?>> charts = new HashSet<>();
 
     private final ScheduledExecutorService executor;
@@ -37,7 +42,7 @@ public abstract class Metrics {
             thread.setDaemon(true);
             return thread;
         });
-        if (enabled) executor.scheduleAtFixedRate(this::submitData, 1, 30, TimeUnit.MINUTES);
+        if (enabled) executor.scheduleAtFixedRate(this::submitData, 0, 30, TimeUnit.MINUTES);
     }
 
     public void addChart(Chart<?> chart) {
@@ -49,12 +54,14 @@ public abstract class Metrics {
             var data = compressData(createData());
             var request = HttpRequest.newBuilder()
                     .POST(HttpRequest.BodyPublishers.ofByteArray(data))
-                    .header("Content-Type", "application/json")
-                    .header("Content-Encoding", "gzip")
-                    .header("User-Agent", "fastStats Metrics")
                     .expectContinue(false)
+                    .header("Content-Encoding", "gzip")
+                    .header("Content-Type", "application/json")
+                    .header("User-Agent", "fastStats Metrics")
+                    .timeout(Duration.ofSeconds(1))
+                    .uri(URI.create(URL))
                     .build();
-            httpClient.send(request, null);
+            httpClient.send(request, HttpResponse.BodyHandlers.discarding());
         } catch (IOException | InterruptedException e) {
             error("Failed to submit metrics", e);
         }
