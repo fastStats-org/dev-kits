@@ -1,4 +1,4 @@
-package org.faststats.metrics;
+package org.faststats;
 
 import com.google.gson.JsonObject;
 import org.bukkit.plugin.Plugin;

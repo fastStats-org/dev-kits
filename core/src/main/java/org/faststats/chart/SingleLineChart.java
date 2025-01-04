@@ -1,15 +1,13 @@
-package org.faststats.metrics.chart;
+package org.faststats.chart;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.Callable;
 
-@NullMarked
-public class SimplePieChart extends Chart<String> {
-    public SimplePieChart(String id, Callable<@Nullable String> callable) {
+public class SingleLineChart extends Chart<Number> {
+    public SingleLineChart(String id, Callable<@Nullable Number> callable) {
         super(id, callable);
     }
 

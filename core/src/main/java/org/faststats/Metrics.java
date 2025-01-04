@@ -1,8 +1,8 @@
-package org.faststats.metrics;
+package org.faststats;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.faststats.metrics.chart.Chart;
+import org.faststats.chart.Chart;
 import org.jspecify.annotations.NullMarked;
 
 import java.io.ByteArrayOutputStream;
