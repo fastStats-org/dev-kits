@@ -85,7 +85,7 @@ public abstract class Metrics {
         data.addProperty("osName", System.getProperty("os.name"));
         data.addProperty("osArch", System.getProperty("os.arch"));
         data.addProperty("osVersion", System.getProperty("os.version"));
-        data.addProperty("coreCount", Runtime.getRuntime().availableProcessors());
+        data.addProperty("processors", Runtime.getRuntime().availableProcessors());
 
         var charts = new JsonArray(this.charts.size());
         this.charts.forEach(chart -> {
