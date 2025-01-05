@@ -82,8 +82,8 @@ public abstract class Metrics {
         data.addProperty("projectId", projectId);
 
         data.addProperty("javaVersion", System.getProperty("java.version"));
-        data.addProperty("osName", System.getProperty("os.name"));
         data.addProperty("osArch", System.getProperty("os.arch"));
+        data.addProperty("osName", System.getProperty("os.name"));
         data.addProperty("osVersion", System.getProperty("os.version"));
         data.addProperty("processors", Runtime.getRuntime().availableProcessors());
 
