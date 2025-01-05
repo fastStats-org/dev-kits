@@ -41,7 +41,10 @@ public abstract class Metrics {
             thread.setDaemon(true);
             return thread;
         });
-        if (enabled) executor.scheduleAtFixedRate(this::submitData, 0, 30, TimeUnit.MINUTES);
+        if (enabled) {
+            var interval = TimeUnit.MINUTES.toSeconds(30);
+            executor.scheduleAtFixedRate(this::submitData, 1, interval, TimeUnit.SECONDS);
+        }
     }
 
     public void addChart(Chart<?> chart) {
