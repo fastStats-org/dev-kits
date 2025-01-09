@@ -19,6 +19,7 @@ public class TestMetrics extends Metrics {
         addChart(new SimplePieChart("server_type", () -> "Paper"));
         addChart(new SimplePieChart("server_version", () -> "1.21.4"));
         addChart(new SingleLineChart("player_amount", () -> 52));
+        startSubmitting();
     }
 
     @Override

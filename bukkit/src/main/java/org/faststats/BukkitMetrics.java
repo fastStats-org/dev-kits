@@ -17,12 +17,13 @@ public class BukkitMetrics extends Metrics {
     public BukkitMetrics(Plugin plugin, int projectId) {
         super(UUID.randomUUID() /* todo: faststats save file*/, true, projectId);
         this.onlineMode = checkOnlineMode();
+        this.plugin = plugin;
         addChart(new SimplePieChart("online_mode", () -> String.valueOf(onlineMode)));
         addChart(new SimplePieChart("plugin_version", () -> plugin.getDescription().getVersion()));
         addChart(new SimplePieChart("server_type", () -> plugin.getServer().getName()));
         addChart(new SimplePieChart("server_version", () -> plugin.getServer().getMinecraftVersion()));
         addChart(new SingleLineChart("player_amount", () -> plugin.getServer().getOnlinePlayers().size()));
-        this.plugin = plugin;
+        startSubmitting();
     }
 
     private boolean checkOnlineMode() {

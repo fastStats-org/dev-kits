@@ -31,27 +31,29 @@ public abstract class Metrics {
     private final ScheduledExecutorService executor;
 
     private final UUID consumerId;
+    private final boolean enabled;
     private final int projectId;
 
     public Metrics(UUID consumerId, boolean enabled, int projectId) {
         this.consumerId = consumerId;
+        this.enabled = enabled;
         this.projectId = projectId;
         this.executor = Executors.newSingleThreadScheduledExecutor(runnable -> {
             var thread = new Thread(runnable, "metrics-submitter");
             thread.setDaemon(true);
             return thread;
         });
-        if (enabled) {
-            var interval = TimeUnit.MINUTES.toSeconds(30);
-            executor.scheduleAtFixedRate(this::submitData, 1, interval, TimeUnit.SECONDS);
-        }
+    }
+
+    protected void startSubmitting() {
+        if (enabled) executor.scheduleAtFixedRate(this::submitData, 0, 30, TimeUnit.MINUTES);
     }
 
     public void addChart(Chart<?> chart) {
         charts.add(chart);
     }
 
-    private void submitData() {
+    protected void submitData() {
         try {
             var data = compressData(createData());
             var request = HttpRequest.newBuilder()
