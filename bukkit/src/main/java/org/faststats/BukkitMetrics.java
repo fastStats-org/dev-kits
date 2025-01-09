@@ -11,16 +11,22 @@ import java.util.logging.Level;
 @NullMarked
 public class BukkitMetrics extends Metrics {
     private final Plugin plugin;
+    private final boolean onlineMode;
 
     @SuppressWarnings("deprecation")
     public BukkitMetrics(Plugin plugin, int projectId) {
         super(UUID.randomUUID() /* todo: faststats save file*/, true, projectId);
-        addChart(new SimplePieChart("onlineMode", () -> String.valueOf(plugin.getServer().getOnlineMode())));
+        this.onlineMode = checkOnlineMode();
+        addChart(new SimplePieChart("onlineMode", () -> String.valueOf(onlineMode)));
         addChart(new SimplePieChart("pluginVersion", () -> plugin.getDescription().getVersion()));
         addChart(new SimplePieChart("serverType", () -> plugin.getServer().getName()));
         addChart(new SimplePieChart("serverVersion", () -> plugin.getServer().getMinecraftVersion()));
         addChart(new SingleLineChart("playerAmount", () -> plugin.getServer().getOnlinePlayers().size()));
         this.plugin = plugin;
+    }
+
+    private boolean checkOnlineMode() {
+        return plugin.getServer().getOnlineMode();
     }
 
     @Override
