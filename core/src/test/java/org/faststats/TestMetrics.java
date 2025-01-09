@@ -14,11 +14,11 @@ public class TestMetrics extends Metrics {
 
     public TestMetrics(UUID consumerId, boolean enabled, int projectId) {
         super(consumerId, enabled, projectId);
-        addChart(new SimplePieChart("onlineMode", () -> String.valueOf(true)));
-        addChart(new SimplePieChart("pluginVersion", () -> "0.1.0"));
-        addChart(new SimplePieChart("serverType", () -> "Paper"));
-        addChart(new SimplePieChart("serverVersion", () -> "1.21.4"));
-        addChart(new SingleLineChart("playerAmount", () -> 52));
+        addChart(new SimplePieChart("online_mode", () -> String.valueOf(true)));
+        addChart(new SimplePieChart("plugin_version", () -> "0.1.0"));
+        addChart(new SimplePieChart("server_type", () -> "Paper"));
+        addChart(new SimplePieChart("server_version", () -> "1.21.4"));
+        addChart(new SingleLineChart("player_amount", () -> 52));
     }
 
     @Override
