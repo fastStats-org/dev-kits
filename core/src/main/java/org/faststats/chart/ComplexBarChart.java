@@ -16,7 +16,7 @@ public class ComplexBarChart extends Chart<Map<String, Number[]>> {
     }
 
     @Override
-    public @Nullable JsonElement getValues() throws Exception {
+    public @Nullable JsonElement getData() throws Exception {
         var bar = callable.call();
         if (bar == null || bar.isEmpty()) return null;
 

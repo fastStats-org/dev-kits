@@ -1,7 +1,6 @@
 package org.faststats.chart;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -17,16 +16,7 @@ public abstract class Chart<T> {
         this.callable = callable;
     }
 
-    public abstract @Nullable JsonElement getValues() throws Exception;
-
-    public final @Nullable JsonObject getData() throws Exception {
-        var values = getValues();
-        if (values == null) return null;
-        var object = new JsonObject();
-        object.addProperty("id", this.id);
-        object.add("values", values);
-        return object;
-    }
+    public abstract @Nullable JsonElement getData() throws Exception;
 
     public String getId() {
         return id;

@@ -13,7 +13,7 @@ public class DrilldownPieChart extends Chart<Map<String, Map<String, Number>>> {
     }
 
     @Override
-    public @Nullable JsonElement getValues() throws Exception {
+    public @Nullable JsonElement getData() throws Exception {
         var drilldown = callable.call();
         if (drilldown == null || drilldown.isEmpty()) return null;
 

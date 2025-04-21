@@ -1,6 +1,5 @@
 package org.faststats;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.faststats.chart.Chart;
 import org.jspecify.annotations.NullMarked;
@@ -84,15 +83,16 @@ public abstract class Metrics {
         data.addProperty("projectId", projectId);
 
         data.addProperty("javaVersion", System.getProperty("java.version"));
+        data.addProperty("locale", System.getProperty("user.language"));
         data.addProperty("osArch", System.getProperty("os.arch"));
         data.addProperty("osName", System.getProperty("os.name"));
         data.addProperty("osVersion", System.getProperty("os.version"));
         data.addProperty("processors", Runtime.getRuntime().availableProcessors());
 
-        var charts = new JsonArray(this.charts.size());
+        var charts = new JsonObject();
         this.charts.forEach(chart -> {
             try {
-                charts.add(chart.getData());
+                charts.add(chart.getId(), chart.getData());
             } catch (Exception e) {
                 error("Failed to build chart data: " + chart.getId(), e);
             }

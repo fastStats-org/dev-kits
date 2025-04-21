@@ -13,7 +13,7 @@ public class MultiLineChart extends Chart<Map<String, Number>> {
     }
 
     @Override
-    public @Nullable JsonElement getValues() throws Exception {
+    public @Nullable JsonElement getData() throws Exception {
         var lines = callable.call();
         if (lines == null || lines.isEmpty()) return null;
 

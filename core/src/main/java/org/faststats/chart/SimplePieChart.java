@@ -14,7 +14,7 @@ public class SimplePieChart extends Chart<String> {
     }
 
     @Override
-    public @Nullable JsonElement getValues() throws Exception {
+    public @Nullable JsonElement getData() throws Exception {
         var value = callable.call();
         return value != null ? new JsonPrimitive(value) : null;
     }

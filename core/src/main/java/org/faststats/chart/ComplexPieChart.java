@@ -15,7 +15,7 @@ public class ComplexPieChart extends Chart<Map<String, Number>> {
     }
 
     @Override
-    public @Nullable JsonElement getValues() throws Exception {
+    public @Nullable JsonElement getData() throws Exception {
         var pie = callable.call();
         if (pie == null || pie.isEmpty()) return null;
 
