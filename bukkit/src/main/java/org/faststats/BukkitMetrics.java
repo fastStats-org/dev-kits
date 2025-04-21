@@ -26,8 +26,25 @@ public class BukkitMetrics extends Metrics {
         startSubmitting();
     }
 
+    @SuppressWarnings("removal")
     private boolean checkOnlineMode() {
-        return plugin.getServer().getOnlineMode();
+        try {
+            if (plugin.getServer().getOnlineMode()) return true;
+
+            // waiting for https://github.com/PaperMC/Paper/pull/12273
+
+            var proxies = plugin.getServer().spigot().getPaperConfig().getConfigurationSection("proxies");
+            if (proxies == null) return false;
+
+            if (proxies.getBoolean("velocity.enabled") && proxies.getBoolean("velocity.online-mode")) return true;
+
+            var settings = plugin.getServer().spigot().getSpigotConfig().getConfigurationSection("settings");
+            if (settings == null) return false;
+
+            return settings.getBoolean("bungeecord") && proxies.getBoolean("bungee-cord.online-mode");
+        } catch (NoSuchMethodError e) {
+            return plugin.getServer().getOnlineMode();
+        }
     }
 
     @Override
