@@ -29,7 +29,7 @@ public class TestMetrics extends Metrics {
 
     @Override
     protected String getURL() {
-        return "http://localhost:3000/metrics";
+        return "http://localhost:5000/metrics";
     }
 
     public static void main(String[] args) {
