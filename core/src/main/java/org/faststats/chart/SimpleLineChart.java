@@ -7,8 +7,8 @@ import org.jspecify.annotations.Nullable;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-final class SimplePieChart extends SimpleChart<String> {
-    public SimplePieChart(@ChartId String id, Callable<@Nullable String> callable) {
+final class SimpleLineChart extends SimpleChart<Number> {
+    public SimpleLineChart(@ChartId String id, Callable<@Nullable Number> callable) {
         super(id, callable);
     }
 
