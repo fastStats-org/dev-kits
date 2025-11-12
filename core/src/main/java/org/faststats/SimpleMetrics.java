@@ -59,9 +59,9 @@ public abstract class SimpleMetrics implements Metrics {
         var charts = new JsonObject();
 
         charts.addProperty("java_version", System.getProperty("java.version"));
-        charts.addProperty("os_arch", System.getProperty("os.arch")); // todo: rename in backend
-        charts.addProperty("os_name", System.getProperty("os.name")); // todo: rename in backend
-        charts.addProperty("os_version", System.getProperty("os.version")); // todo: rename in backend
+        charts.addProperty("os_arch", System.getProperty("os.arch"));
+        charts.addProperty("os_name", System.getProperty("os.name"));
+        charts.addProperty("os_version", System.getProperty("os.version"));
         charts.addProperty("core_count", Runtime.getRuntime().availableProcessors());
 
         this.charts.forEach(chart -> {
