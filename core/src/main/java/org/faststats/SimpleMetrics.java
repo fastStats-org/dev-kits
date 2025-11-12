@@ -45,7 +45,15 @@ public abstract class SimpleMetrics implements Metrics {
         try {
             var bytes = createData().toString().getBytes(StandardCharsets.UTF_8);
             var compressed = Zstd.compress(bytes, 6);
-            var request = HttpRequest.newBuilder().POST(HttpRequest.BodyPublishers.ofByteArray(compressed)).header("content-encoding", "zstd").header("content-type", "application/octet-stream").header("authorization", "Bearer " + getToken()).header("user-agent", "fastStats Metrics").timeout(Duration.ofSeconds(3)).uri(URI.create(getURL())).build();
+            var request = HttpRequest.newBuilder()
+                    .POST(HttpRequest.BodyPublishers.ofByteArray(compressed))
+                    .header("content-encoding", "zstd")
+                    .header("content-type", "application/octet-stream")
+                    .header("authorization", "Bearer " + getToken())
+                    .header("user-agent", "fastStats Metrics").
+                    timeout(Duration.ofSeconds(3))
+                    .uri(URI.create(getURL()))
+                    .build();
             httpClient.send(request, HttpResponse.BodyHandlers.discarding());
             // todo: add debugs
         } catch (IOException | InterruptedException e) {
