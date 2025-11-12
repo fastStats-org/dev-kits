@@ -30,7 +30,7 @@ public interface Chart<T> {
      *
      * @return an optional containing the chart data
      * @throws Exception if unable to compute the chart data
-     * @implNote The implementation must be thread-safe and pure.
+     * @implSpec The implementation must be thread-safe and pure.
      * @since 0.1.0
      */
     @Contract(pure = true)
