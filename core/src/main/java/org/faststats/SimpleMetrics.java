@@ -47,11 +47,11 @@ public abstract class SimpleMetrics implements Metrics {
             var compressed = Zstd.compress(bytes, 6);
             var request = HttpRequest.newBuilder()
                     .POST(HttpRequest.BodyPublishers.ofByteArray(compressed))
-                    .header("content-encoding", "zstd")
-                    .header("content-type", "application/octet-stream")
-                    .header("authorization", "Bearer " + getToken())
-                    .header("user-agent", "fastStats Metrics").
-                    timeout(Duration.ofSeconds(3))
+                    .header("Content-Encoding", "zstd")
+                    .header("Content-Type", "application/octet-stream")
+                    .header("Authorization", "Bearer " + getToken())
+                    .header("User-Agent", "fastStats Metrics")
+                    .timeout(Duration.ofSeconds(3))
                     .uri(URI.create(getURL()))
                     .build();
             httpClient.send(request, HttpResponse.BodyHandlers.discarding());
