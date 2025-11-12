@@ -3,7 +3,7 @@ package org.faststats;
 import org.faststats.chart.Chart;
 
 public interface Metrics {
-    int getProjectId();
+    String getToken();
 
     void addChart(Chart<?> chart);
 }
