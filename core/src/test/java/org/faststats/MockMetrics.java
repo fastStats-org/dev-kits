@@ -21,7 +21,7 @@ public class MockMetrics extends SimpleMetrics {
     }
 
     @Override
-    protected void info(String message) {
+    protected void debug(String message) {
         System.out.println(message);
     }
 

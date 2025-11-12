@@ -125,7 +125,7 @@ public class BukkitMetrics extends SimpleMetrics {
     }
 
     @Override
-    protected void info(String message) {
+    protected void debug(String message) {
         if (debug) plugin.getLogger().log(Level.INFO, message);
     }
 

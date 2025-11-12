@@ -95,7 +95,7 @@ public abstract class SimpleMetrics implements Metrics {
 
     protected abstract void error(String message, Throwable throwable);
 
-    protected abstract void info(String message);
+    protected abstract void debug(String message);
 
     public void shutdown() {
         executor.shutdown();
