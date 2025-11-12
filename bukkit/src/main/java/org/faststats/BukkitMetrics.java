@@ -50,7 +50,7 @@ public class BukkitMetrics extends SimpleMetrics {
         addChart(Chart.pie("plugin_version", () -> plugin.getDescription().getVersion()));
         addChart(Chart.pie("server_type", () -> plugin.getServer().getName()));
         addChart(Chart.pie("minecraft_version", () -> plugin.getServer().getMinecraftVersion()));
-        addChart(Chart.line("player_count", () -> plugin.getServer().getOnlinePlayers().size()));  // todo: rename in backend
+        addChart(Chart.line("player_count", () -> plugin.getServer().getOnlinePlayers().size()));
         startSubmitting();
     }
 
