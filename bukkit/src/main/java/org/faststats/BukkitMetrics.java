@@ -1,5 +1,6 @@
 package org.faststats;
 
+import com.google.gson.FormattingStyle;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
@@ -48,8 +49,8 @@ public class BukkitMetrics extends SimpleMetrics {
         addChart(Chart.pie("online_mode", () -> String.valueOf(onlineMode)));
         addChart(Chart.pie("plugin_version", () -> plugin.getDescription().getVersion()));
         addChart(Chart.pie("server_type", () -> plugin.getServer().getName()));
-        addChart(Chart.pie("server_version", () -> plugin.getServer().getMinecraftVersion()));
-        addChart(Chart.line("player_amount", () -> plugin.getServer().getOnlinePlayers().size()));
+        addChart(Chart.pie("minecraft_version", () -> plugin.getServer().getMinecraftVersion()));
+        addChart(Chart.line("player_count", () -> plugin.getServer().getOnlinePlayers().size()));  // todo: rename in backend
         startSubmitting();
     }
 
@@ -63,8 +64,10 @@ public class BukkitMetrics extends SimpleMetrics {
     }
 
     private static void create(Path path) throws IOException {
+        Files.createDirectories(path.getParent());
         try (var out = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW);
              var writer = new JsonWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
+            writer.setFormattingStyle(FormattingStyle.PRETTY);
             writer.beginObject();
             writer.name("serverId").value(UUID.randomUUID().toString());
             writer.name("enabled").value(true);

@@ -19,9 +19,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public abstract class SimpleMetrics implements Metrics {
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(3))
-            .build();
+    private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
     private final Set<Chart<?>> charts = new HashSet<>();
 
     private final ScheduledExecutorService executor;
@@ -47,34 +45,25 @@ public abstract class SimpleMetrics implements Metrics {
         try {
             var bytes = createData().toString().getBytes(StandardCharsets.UTF_8);
             var compressed = Zstd.compress(bytes, 6);
-            var request = HttpRequest.newBuilder()
-                    .POST(HttpRequest.BodyPublishers.ofByteArray(compressed))
-                    .header("Content-Encoding", "zstd")
-                    .header("Content-Type", "application/octet-stream")
-                    .header("Authorization", "Bearer " + getToken())
-                    .header("User-Agent", "fastStats Metrics")
-                    .timeout(Duration.ofSeconds(3))
-                    .uri(URI.create(getURL()))
-                    .build();
+            var request = HttpRequest.newBuilder().POST(HttpRequest.BodyPublishers.ofByteArray(compressed)).header("content-encoding", "zstd").header("content-type", "application/octet-stream").header("authorization", "Bearer " + getToken()).header("user-agent", "fastStats Metrics").timeout(Duration.ofSeconds(3)).uri(URI.create(getURL())).build();
             httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+            // todo: add debugs
         } catch (IOException | InterruptedException e) {
+            // todo: shorten connection errors
             error("Failed to submit metrics", e);
         }
     }
 
     protected JsonObject createData() {
         var data = new JsonObject();
-        data.addProperty("serverIdentifier", getServerId().toString());
-        data.addProperty("token", getToken());
-
-        data.addProperty("javaVersion", System.getProperty("java.version"));
-        data.addProperty("locale", System.getProperty("user.language"));
-        data.addProperty("osArch", System.getProperty("os.arch"));
-        data.addProperty("osName", System.getProperty("os.name"));
-        data.addProperty("osVersion", System.getProperty("os.version"));
-        data.addProperty("processors", Runtime.getRuntime().availableProcessors());
-
         var charts = new JsonObject();
+
+        charts.addProperty("java_version", System.getProperty("java.version"));
+        charts.addProperty("os_arch", System.getProperty("os.arch")); // todo: rename in backend
+        charts.addProperty("os_name", System.getProperty("os.name")); // todo: rename in backend
+        charts.addProperty("os_version", System.getProperty("os.version")); // todo: rename in backend
+        charts.addProperty("core_count", Runtime.getRuntime().availableProcessors());
+
         this.charts.forEach(chart -> {
             try {
                 chart.getData().ifPresent(chartData -> charts.add(chart.getId(), chartData));
@@ -82,7 +71,9 @@ public abstract class SimpleMetrics implements Metrics {
                 error("Failed to build chart data: " + chart.getId(), e);
             }
         });
-        if (!charts.isEmpty()) data.add("charts", charts);
+
+        data.addProperty("server_id", getServerId().toString());
+        data.add("data", charts);
         return data;
     }
 
