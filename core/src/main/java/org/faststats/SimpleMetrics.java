@@ -54,8 +54,8 @@ public abstract class SimpleMetrics implements Metrics {
                     .timeout(Duration.ofSeconds(3))
                     .uri(URI.create(getURL()))
                     .build();
-            httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-            // todo: add debugs
+            var send = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+            debug("Metrics submitted with status code: " + send.statusCode());
         } catch (IOException | InterruptedException e) {
             // todo: shorten connection errors
             error("Failed to submit metrics", e);
