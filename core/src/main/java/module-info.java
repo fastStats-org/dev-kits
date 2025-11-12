@@ -10,4 +10,5 @@ module org.faststats.core {
 
     requires static org.jspecify;
     requires org.jetbrains.annotations;
+    requires com.github.luben.zstd_jni;
 }

@@ -1,9 +1,9 @@
 package org.faststats;
 
+import com.github.luben.zstd.Zstd;
 import com.google.gson.JsonObject;
 import org.faststats.chart.Chart;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -17,7 +17,6 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPOutputStream;
 
 public abstract class SimpleMetrics implements Metrics {
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -27,14 +26,7 @@ public abstract class SimpleMetrics implements Metrics {
 
     private final ScheduledExecutorService executor;
 
-    private final UUID consumerId;
-    private final boolean enabled;
-    private final int projectId;
-
-    public SimpleMetrics(UUID consumerId, boolean enabled, int projectId) {
-        this.consumerId = consumerId;
-        this.enabled = enabled;
-        this.projectId = projectId;
+    public SimpleMetrics() {
         this.executor = Executors.newSingleThreadScheduledExecutor(runnable -> {
             var thread = new Thread(runnable, "metrics-submitter");
             thread.setDaemon(true);
@@ -42,13 +34,8 @@ public abstract class SimpleMetrics implements Metrics {
         });
     }
 
-    @Override
-    public int getProjectId() {
-        return projectId;
-    }
-
     protected void startSubmitting() {
-        if (enabled) executor.scheduleAtFixedRate(this::submitData, 0, 30, TimeUnit.MINUTES);
+        if (isEnabled()) executor.scheduleAtFixedRate(this::submitData, 0, 30, TimeUnit.MINUTES);
     }
 
     @Override
@@ -58,13 +45,15 @@ public abstract class SimpleMetrics implements Metrics {
 
     protected void submitData() {
         try {
-            var data = compressData(createData());
+            var bytes = createData().toString().getBytes(StandardCharsets.UTF_8);
+            var compressed = Zstd.compress(bytes, 6);
             var request = HttpRequest.newBuilder()
-                    .POST(HttpRequest.BodyPublishers.ofByteArray(data))
+                    .POST(HttpRequest.BodyPublishers.ofByteArray(compressed))
                     .header("Content-Encoding", "zstd")
-                    .header("Content-Type", "application/json")
+                    .header("Content-Type", "application/octet-stream")
+                    .header("Authorization", "Bearer " + getToken())
                     .header("User-Agent", "fastStats Metrics")
-                    .timeout(Duration.ofSeconds(1))
+                    .timeout(Duration.ofSeconds(3))
                     .uri(URI.create(getURL()))
                     .build();
             httpClient.send(request, HttpResponse.BodyHandlers.discarding());
@@ -73,19 +62,10 @@ public abstract class SimpleMetrics implements Metrics {
         }
     }
 
-    private byte[] compressData(JsonObject data) throws IOException {
-        var output = new ByteArrayOutputStream();
-        // todo: use zstd compression
-        try (var gzip = new GZIPOutputStream(output)) {
-            gzip.write(data.toString().getBytes(StandardCharsets.UTF_8));
-        }
-        return output.toByteArray();
-    }
-
-    private JsonObject createData() {
+    protected JsonObject createData() {
         var data = new JsonObject();
-        data.addProperty("consumerId", consumerId.toString());
-        data.addProperty("projectId", projectId);
+        data.addProperty("serverIdentifier", getServerId().toString());
+        data.addProperty("token", getToken());
 
         data.addProperty("javaVersion", System.getProperty("java.version"));
         data.addProperty("locale", System.getProperty("user.language"));
@@ -110,9 +90,13 @@ public abstract class SimpleMetrics implements Metrics {
         return "https://api.faststats.org/v1/metrics";
     }
 
+    protected abstract UUID getServerId();
+
+    protected abstract boolean isEnabled();
+
     protected abstract void error(String message, Throwable throwable);
 
-    protected abstract void debug(String message, Throwable throwable);
+    protected abstract void info(String message);
 
     public void shutdown() {
         executor.shutdown();
