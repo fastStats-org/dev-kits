@@ -38,6 +38,15 @@ dependencies {
 
 publishing {
     publications.create<MavenPublication>("maven") {
+        artifactId = "bukkit"
+        groupId = "org.faststats.metrics"
+        pom.url.set("https://faststats.org/docs")
+        pom.scm {
+            val repository = "fastStats-org/dev-kits"
+            url.set("https://github.com/$repository")
+            connection.set("scm:git:git://github.com/$repository.git")
+            developerConnection.set("scm:git:ssh://github.com/$repository.git")
+        }
         from(components["java"])
     }
     repositories.maven {
