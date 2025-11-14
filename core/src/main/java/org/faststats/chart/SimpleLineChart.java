@@ -14,6 +14,6 @@ final class SimpleLineChart extends SimpleChart<Number> {
 
     @Override
     public Optional<JsonElement> getData() throws Exception {
-        return compute().map(JsonPrimitive::new);
+        return compute().filter(number -> number.doubleValue() != 0).map(JsonPrimitive::new);
     }
 }
