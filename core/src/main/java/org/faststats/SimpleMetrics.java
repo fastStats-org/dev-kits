@@ -3,6 +3,7 @@ package org.faststats;
 import com.github.luben.zstd.Zstd;
 import com.google.gson.JsonObject;
 import org.faststats.chart.Chart;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,19 +22,22 @@ import java.util.concurrent.TimeUnit;
 public abstract class SimpleMetrics implements Metrics {
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
     private final Set<Chart<?>> charts = new HashSet<>();
+    private @Nullable ScheduledExecutorService executor = null;
 
-    private final ScheduledExecutorService executor;
+    protected void startSubmitting(int initialDelay, int period, TimeUnit unit) {
+        if (!isEnabled()) {
+            debug("Metrics disabled, not starting submission");
+            return;
+        }
 
-    public SimpleMetrics() {
         this.executor = Executors.newSingleThreadScheduledExecutor(runnable -> {
             var thread = new Thread(runnable, "metrics-submitter");
             thread.setDaemon(true);
             return thread;
         });
-    }
 
-    protected void startSubmitting() {
-        if (isEnabled()) executor.scheduleAtFixedRate(this::submitData, 0, 30, TimeUnit.MINUTES);
+        debug("Starting metrics submission");
+        executor.scheduleAtFixedRate(this::submitData, initialDelay, period, unit);
     }
 
     @Override
@@ -98,6 +102,9 @@ public abstract class SimpleMetrics implements Metrics {
     protected abstract void debug(String message);
 
     public void shutdown() {
+        debug("Shutting down metrics");
+        if (executor == null) return;
         executor.shutdown();
+        executor = null;
     }
 }

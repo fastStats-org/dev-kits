@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import org.bukkit.plugin.Plugin;
 import org.faststats.chart.Chart;
+import org.jetbrains.annotations.TestOnly;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -18,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
@@ -52,6 +54,30 @@ public class BukkitMetrics extends SimpleMetrics {
         addChart(Chart.pie("minecraft_version", () -> plugin.getServer().getMinecraftVersion()));
         addChart(Chart.line("player_count", () -> plugin.getServer().getOnlinePlayers().size()));
         startSubmitting();
+    }
+
+    @TestOnly
+    @SuppressWarnings("deprecation")
+    public BukkitMetrics(Plugin plugin, String token, UUID serverId, boolean enabled, boolean debug) {
+        this.serverId = serverId;
+        this.enabled = enabled;
+        this.debug = debug;
+
+        this.plugin = plugin;
+        this.onlineMode = checkOnlineMode();
+
+        this.token = token;
+
+        addChart(Chart.pie("online_mode", () -> String.valueOf(onlineMode)));
+        addChart(Chart.pie("plugin_version", () -> plugin.getDescription().getVersion()));
+        addChart(Chart.pie("server_type", () -> plugin.getServer().getName()));
+        addChart(Chart.pie("minecraft_version", () -> plugin.getServer().getMinecraftVersion()));
+        addChart(Chart.line("player_count", () -> plugin.getServer().getOnlinePlayers().size()));
+        startSubmitting();
+    }
+
+    protected void startSubmitting() {
+        startSubmitting(0, 30, TimeUnit.MINUTES);
     }
 
     private static Optional<JsonObject> readOrCreate(Path path) throws IOException {
@@ -101,14 +127,6 @@ public class BukkitMetrics extends SimpleMetrics {
         return settings.getBoolean("bungeecord") && proxies.getBoolean("bungee-cord.online-mode");
     }
 
-    private <T> Optional<T> tryOrEmpty(Supplier<@Nullable T> supplier) {
-        try {
-            return Optional.ofNullable(supplier.get());
-        } catch (NoSuchMethodError | Exception e) {
-            return Optional.empty();
-        }
-    }
-
     @Override
     protected UUID getServerId() {
         return serverId;
@@ -121,16 +139,29 @@ public class BukkitMetrics extends SimpleMetrics {
 
     @Override
     protected void error(String message, Throwable throwable) {
-        if (debug) plugin.getLogger().log(Level.SEVERE, message, throwable);
+        if (!debug) return;
+        var msg = "[" + BukkitMetrics.class.getName() + "]: " + message;
+        plugin.getLogger().log(Level.SEVERE, msg, throwable);
     }
 
     @Override
     protected void debug(String message) {
-        if (debug) plugin.getLogger().log(Level.INFO, message);
+        if (!debug) return;
+        var msg = "[" + BukkitMetrics.class.getName() + "]: " + message;
+        plugin.getLogger().log(Level.INFO, msg);
     }
 
     @Override
     public String getToken() {
         return token;
+    }
+    
+    private <T> Optional<T> tryOrEmpty(Supplier<@Nullable T> supplier) {
+        try {
+            return Optional.ofNullable(supplier.get());
+        } catch (NoSuchMethodError | Exception e) {
+            error("Failed to call supplier", e);
+            return Optional.empty();
+        }
     }
 }
