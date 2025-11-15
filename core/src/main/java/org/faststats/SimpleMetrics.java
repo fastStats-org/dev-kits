@@ -30,6 +30,11 @@ public abstract class SimpleMetrics implements Metrics {
             return;
         }
 
+        if (isSubmitting()) {
+            debug("Metrics already submitting, not starting again");
+            return;
+        }
+
         this.executor = Executors.newSingleThreadScheduledExecutor(runnable -> {
             var thread = new Thread(runnable, "metrics-submitter");
             thread.setDaemon(true);
@@ -38,6 +43,10 @@ public abstract class SimpleMetrics implements Metrics {
 
         debug("Starting metrics submission");
         executor.scheduleAtFixedRate(this::submitData, initialDelay, period, unit);
+    }
+
+    protected boolean isSubmitting() {
+        return executor != null && !executor.isShutdown();
     }
 
     @Override
