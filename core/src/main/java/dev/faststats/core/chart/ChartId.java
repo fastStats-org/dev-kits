@@ -1,6 +1,7 @@
 package dev.faststats.core.chart;
 
 import org.intellij.lang.annotations.Pattern;
+import org.jetbrains.annotations.NonNls;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,6 +17,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
  *
  * @since 0.1.0
  */
+@NonNls
 @Pattern(ChartId.PATTERN)
 @Retention(RetentionPolicy.CLASS)
 @Target({METHOD, FIELD, PARAMETER, LOCAL_VARIABLE})
