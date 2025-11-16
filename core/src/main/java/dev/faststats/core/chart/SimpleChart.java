@@ -2,6 +2,7 @@ package dev.faststats.core.chart;
 
 import org.jspecify.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -24,6 +25,18 @@ abstract class SimpleChart<T> implements Chart<T> {
 
     public final Optional<T> compute() throws Exception {
         return Optional.ofNullable(callable.call());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        SimpleChart<?> that = (SimpleChart<?>) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     @Override
