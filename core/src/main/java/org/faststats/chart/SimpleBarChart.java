@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
+@Deprecated
 final class SimpleBarChart extends SimpleChart<Map<String, Number>> {
     public SimpleBarChart(@ChartId String id, Callable<@Nullable Map<String, Number>> callable) {
         super(id, callable);
