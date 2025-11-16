@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
 
 @Deprecated
 final class SimpleBarChart extends SimpleChart<Map<String, Number>> {
-    public SimpleBarChart(@ChartId String id, Callable<@Nullable Map<String, Number>> callable) {
+    public SimpleBarChart(@ChartId String id, Callable<@Nullable Map<String, Number>> callable) throws IllegalArgumentException {
         super(id, callable);
     }
 

@@ -55,6 +55,7 @@ public interface Chart<T> {
      * @param id       the chart id
      * @param callable the chart data callable
      * @return the bar chart
+     * @throws IllegalArgumentException if the chart id is invalid
      * @apiNote The callable must be thread-safe and pure (i.e. not modify any shared state).
      * @see #compute()
      * @since 0.1.0
@@ -62,7 +63,7 @@ public interface Chart<T> {
     // todo: introduce a better way to transmit multiple values
     @Deprecated
     @Contract(value = "_, _ -> new", pure = true)
-    static Chart<Map<String, Number>> bar(@ChartId String id, Callable<@Nullable Map<String, Number>> callable) {
+    static Chart<Map<String, Number>> bar(@ChartId String id, Callable<@Nullable Map<String, Number>> callable) throws IllegalArgumentException {
         return new SimpleBarChart(id, callable);
     }
 
@@ -72,12 +73,13 @@ public interface Chart<T> {
      * @param id       the chart id
      * @param callable the chart data callable
      * @return the boolean chart
+     * @throws IllegalArgumentException if the chart id is invalid
      * @apiNote The callable must be thread-safe and pure (i.e. not modify any shared state).
      * @see #compute()
      * @since 0.1.0
      */
     @Contract(value = "_, _ -> new", pure = true)
-    static Chart<Boolean> bool(@ChartId String id, Callable<@Nullable Boolean> callable) {
+    static Chart<Boolean> bool(@ChartId String id, Callable<@Nullable Boolean> callable) throws IllegalArgumentException {
         return new SingleValueChart<>(id, callable);
     }
 
@@ -87,12 +89,13 @@ public interface Chart<T> {
      * @param id       the chart id
      * @param callable the chart data callable
      * @return the string chart
+     * @throws IllegalArgumentException if the chart id is invalid
      * @apiNote The callable must be thread-safe and pure (i.e. not modify any shared state).
      * @see #compute()
      * @since 0.1.0
      */
     @Contract(value = "_, _ -> new", pure = true)
-    static Chart<String> string(@ChartId String id, Callable<@Nullable String> callable) {
+    static Chart<String> string(@ChartId String id, Callable<@Nullable String> callable) throws IllegalArgumentException {
         return new SingleValueChart<>(id, callable);
     }
 
@@ -102,12 +105,13 @@ public interface Chart<T> {
      * @param id       the chart id
      * @param callable the chart data callable
      * @return the number chart
+     * @throws IllegalArgumentException if the chart id is invalid
      * @apiNote The callable must be thread-safe and pure (i.e. not modify any shared state).
      * @see #compute()
      * @since 0.1.0
      */
     @Contract(value = "_, _ -> new", pure = true)
-    static Chart<Number> number(@ChartId String id, Callable<@Nullable Number> callable) {
+    static Chart<Number> number(@ChartId String id, Callable<@Nullable Number> callable) throws IllegalArgumentException {
         return new SingleValueChart<>(id, callable);
     }
 }

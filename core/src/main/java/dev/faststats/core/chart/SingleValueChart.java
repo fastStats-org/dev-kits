@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 final class SingleValueChart<T> extends SimpleChart<T> {
-    public SingleValueChart(@ChartId String id, Callable<@Nullable T> callable) {
+    public SingleValueChart(@ChartId String id, Callable<@Nullable T> callable) throws IllegalArgumentException {
         super(id, callable);
     }
 

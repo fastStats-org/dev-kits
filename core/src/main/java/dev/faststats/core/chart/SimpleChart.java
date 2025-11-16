@@ -9,7 +9,7 @@ abstract class SimpleChart<T> implements Chart<T> {
     private final @ChartId String id;
     private final Callable<@Nullable T> callable;
 
-    public SimpleChart(@ChartId String id, Callable<@Nullable T> callable) {
+    public SimpleChart(@ChartId String id, Callable<@Nullable T> callable) throws IllegalArgumentException {
         if (!id.matches(ChartId.PATTERN)) {
             throw new IllegalArgumentException("Invalid chart id '" + id + "', must match '" + ChartId.PATTERN + "'");
         }
