@@ -36,11 +36,13 @@ public class BukkitMetrics extends SimpleMetrics {
         var dataFolder = plugin.getServer().getPluginsFolder().toPath().resolve("faststats");
         var config = dataFolder.resolve("config.json");
 
-        var json = readOrCreate(config);
+        var json = readOrEmpty(config);
 
         this.serverId = json.map(object -> UUID.fromString(object.get("serverId").getAsString())).orElseGet(UUID::randomUUID);
         this.enabled = json.map(object -> object.get("enabled").getAsBoolean()).orElse(true);
         this.debug = json.map(object -> object.get("debug").getAsBoolean()).orElse(false);
+
+        if (json.isEmpty()) create(config, serverId);
 
         this.plugin = plugin;
         this.onlineMode = checkOnlineMode();
@@ -65,9 +67,15 @@ public class BukkitMetrics extends SimpleMetrics {
     @SuppressWarnings("deprecation")
     protected void setup() {
         addChart(Chart.bool("online_mode", () -> onlineMode));
-        addChart(Chart.string("plugin_version", () -> plugin.getDescription().getVersion()));
+        addChart(Chart.string("plugin_version", () -> {
+            return tryOrEmpty(() -> plugin.getPluginMeta().getVersion())
+                    .orElseGet(() -> plugin.getDescription().getVersion());
+        }));
         addChart(Chart.string("server_type", () -> plugin.getServer().getName()));
-        addChart(Chart.string("minecraft_version", () -> plugin.getServer().getMinecraftVersion()));
+        addChart(Chart.string("minecraft_version", () -> {
+            return tryOrEmpty(() -> plugin.getServer().getMinecraftVersion())
+                    .orElse("unknown");
+        }));
         addChart(Chart.number("player_count", () -> {
             var size = plugin.getServer().getOnlinePlayers().size();
             return size != 0 ? size : null;
@@ -79,22 +87,21 @@ public class BukkitMetrics extends SimpleMetrics {
         startSubmitting(0, 30, TimeUnit.MINUTES);
     }
 
-    private static Optional<JsonObject> readOrCreate(Path path) throws IOException {
+    private static Optional<JsonObject> readOrEmpty(Path path) throws IOException {
         if (Files.isRegularFile(path)) {
             return Optional.of(read(path));
         } else {
-            create(path);
             return Optional.empty();
         }
     }
 
-    private static void create(Path path) throws IOException {
+    private static void create(Path path, UUID serverId) throws IOException {
         Files.createDirectories(path.getParent());
         try (var out = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW);
              var writer = new JsonWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
             writer.setFormattingStyle(FormattingStyle.PRETTY);
             writer.beginObject();
-            writer.name("serverId").value(UUID.randomUUID().toString());
+            writer.name("serverId").value(serverId.toString());
             writer.name("enabled").value(true);
             writer.name("debug").value(false);
             writer.endObject();
@@ -137,14 +144,21 @@ public class BukkitMetrics extends SimpleMetrics {
     }
 
     @Override
-    protected void error(String message, Throwable throwable) {
+    protected void error(String message, @Nullable Throwable throwable) {
         if (!debug) return;
         var msg = "[" + BukkitMetrics.class.getName() + "]: " + message;
         plugin.getLogger().log(Level.SEVERE, msg, throwable);
     }
 
     @Override
-    protected void debug(String message) {
+    protected void warn(String message) {
+        if (!debug) return;
+        var msg = "[" + BukkitMetrics.class.getName() + "]: " + message;
+        plugin.getLogger().log(Level.WARNING, msg);
+    }
+
+    @Override
+    protected void info(String message) {
         if (!debug) return;
         var msg = "[" + BukkitMetrics.class.getName() + "]: " + message;
         plugin.getLogger().log(Level.INFO, msg);
