@@ -5,33 +5,34 @@ import com.google.gson.JsonObject;
 import org.faststats.chart.Chart;
 import org.jspecify.annotations.Nullable;
 
-import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public abstract class SimpleMetrics implements Metrics {
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
-    private final Set<Chart<?>> charts = new HashSet<>();
+    private final Set<Chart<?>> charts = new CopyOnWriteArraySet<>();
     private @Nullable ScheduledExecutorService executor = null;
 
     protected void startSubmitting(int initialDelay, int period, TimeUnit unit) {
         if (!isEnabled()) {
-            debug("Metrics disabled, not starting submission");
+            warn("Metrics disabled, not starting submission");
             return;
         }
 
         if (isSubmitting()) {
-            debug("Metrics already submitting, not starting again");
+            warn("Metrics already submitting, not starting again");
             return;
         }
 
@@ -41,7 +42,7 @@ public abstract class SimpleMetrics implements Metrics {
             return thread;
         });
 
-        debug("Starting metrics submission");
+        info("Starting metrics submission");
         executor.scheduleAtFixedRate(this::submitData, initialDelay, period, unit);
     }
 
@@ -56,8 +57,8 @@ public abstract class SimpleMetrics implements Metrics {
 
     protected void submitData() {
         try {
-            var bytes = createData().toString().getBytes(StandardCharsets.UTF_8);
-            var compressed = Zstd.compress(bytes, 6);
+            var data = createData().toString();
+            var compressed = Zstd.compress(data.getBytes(StandardCharsets.UTF_8), 6);
             var request = HttpRequest.newBuilder()
                     .POST(HttpRequest.BodyPublishers.ofByteArray(compressed))
                     .header("Content-Encoding", "zstd")
@@ -67,9 +68,32 @@ public abstract class SimpleMetrics implements Metrics {
                     .timeout(Duration.ofSeconds(3))
                     .uri(URI.create(getURL()))
                     .build();
-            var send = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-            debug("Metrics submitted with status code: " + send.statusCode());
-        } catch (IOException | InterruptedException e) {
+
+            info("Sending metrics to: " + getURL());
+            info("Uncompressed data: " + data);
+            info("Compressed size: " + compressed.length + " bytes");
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            var statusCode = response.statusCode();
+            var body = response.body();
+
+            if (statusCode >= 200 && statusCode < 300) {
+                info("Metrics submitted with status code: " + statusCode + " (" + body + ")");
+            } else if (statusCode >= 300 && statusCode < 400) {
+                warn("Received redirect response from metrics server: " + statusCode + " (" + body + ")");
+            } else if (statusCode >= 400 && statusCode < 500) {
+                error("Submitted invalid request to metrics server: " + statusCode + " (" + body + ")", null);
+            } else if (statusCode >= 500 && statusCode < 600) {
+                error("Received server error response from metrics server: " + statusCode + " (" + body + ")", null);
+            } else {
+                warn("Received unexpected response from metrics server: " + statusCode + " (" + body + ")");
+            }
+
+        } catch (HttpConnectTimeoutException e) {
+            error("Metrics submission timed out after 3 seconds: " + getURL(), null);
+        } catch (ConnectException e) {
+            error("Failed to connect to metrics server: " + getURL(), null);
+        } catch (Exception e) {
             // todo: shorten connection errors
             error("Failed to submit metrics", e);
         }
@@ -106,12 +130,14 @@ public abstract class SimpleMetrics implements Metrics {
 
     protected abstract boolean isEnabled();
 
-    protected abstract void error(String message, Throwable throwable);
+    protected abstract void error(String message, @Nullable Throwable throwable);
 
-    protected abstract void debug(String message);
+    protected abstract void warn(String message);
+
+    protected abstract void info(String message);
 
     public void shutdown() {
-        debug("Shutting down metrics");
+        info("Shutting down metrics submission");
         if (executor == null) return;
         executor.shutdown();
         executor = null;
