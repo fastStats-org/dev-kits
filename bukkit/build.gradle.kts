@@ -4,7 +4,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "org.faststats.metrics"
+group = "dev.faststats.metrics"
 version = "0.1.0"
 
 java {
@@ -39,10 +39,10 @@ dependencies {
 publishing {
     publications.create<MavenPublication>("maven") {
         artifactId = "bukkit"
-        groupId = "org.faststats.metrics"
-        pom.url.set("https://faststats.org/docs")
+        groupId = "dev.faststats.metrics"
+        pom.url.set("https://faststats.dev/docs")
         pom.scm {
-            val repository = "fastStats-org/dev-kits"
+            val repository = "faststats-dev/dev-kits"
             url.set("https://github.com/$repository")
             connection.set("scm:git:git://github.com/$repository.git")
             developerConnection.set("scm:git:ssh://github.com/$repository.git")

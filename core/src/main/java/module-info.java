@@ -1,9 +1,9 @@
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-module org.faststats.core {
-    exports org.faststats.chart;
-    exports org.faststats;
+module dev.faststats.core {
+    exports dev.faststats.chart;
+    exports dev.faststats;
 
     requires com.github.luben.zstd_jni;
     requires com.google.gson;

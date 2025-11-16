@@ -1,12 +1,12 @@
-package org.faststats;
+package dev.faststats;
 
 import com.google.gson.FormattingStyle;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import dev.faststats.chart.Chart;
 import org.bukkit.plugin.Plugin;
-import org.faststats.chart.Chart;
 import org.jetbrains.annotations.TestOnly;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;

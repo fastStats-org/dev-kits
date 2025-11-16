@@ -1,4 +1,4 @@
-package org.faststats.chart;
+package dev.faststats.chart;
 
 import org.jspecify.annotations.Nullable;
 

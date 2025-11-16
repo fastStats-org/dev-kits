@@ -1,4 +1,4 @@
-package org.faststats.chart;
+package dev.faststats.chart;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;

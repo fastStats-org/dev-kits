@@ -1,4 +1,4 @@
-package org.faststats;
+package dev.faststats;
 
 import com.github.luben.zstd.Zstd;
 import org.junit.jupiter.api.Test;

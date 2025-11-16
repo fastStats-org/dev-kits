@@ -1,8 +1,8 @@
-package org.faststats;
+package dev.faststats;
 
 import com.github.luben.zstd.Zstd;
 import com.google.gson.JsonObject;
-import org.faststats.chart.Chart;
+import dev.faststats.chart.Chart;
 import org.jspecify.annotations.Nullable;
 
 import java.net.ConnectException;
@@ -64,7 +64,7 @@ public abstract class SimpleMetrics implements Metrics {
                     .header("Content-Encoding", "zstd")
                     .header("Content-Type", "application/octet-stream")
                     .header("Authorization", "Bearer " + getToken())
-                    .header("User-Agent", "fastStats Metrics")
+                    .header("User-Agent", "FastStats Metrics")
                     .timeout(Duration.ofSeconds(3))
                     .uri(URI.create(getURL()))
                     .build();
@@ -123,7 +123,7 @@ public abstract class SimpleMetrics implements Metrics {
     }
 
     protected String getURL() {
-        return "https://api.faststats.org/v1/metrics";
+        return "https://api.faststats.dev/v1/metrics";
     }
 
     protected abstract UUID getServerId();

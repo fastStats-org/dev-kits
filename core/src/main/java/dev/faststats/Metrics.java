@@ -1,6 +1,6 @@
-package org.faststats;
+package dev.faststats;
 
-import org.faststats.chart.Chart;
+import dev.faststats.chart.Chart;
 import org.jetbrains.annotations.Contract;
 
 public interface Metrics {

@@ -1,4 +1,4 @@
-package org.faststats;
+package dev.faststats;
 
 import com.google.gson.JsonObject;
 import org.jspecify.annotations.NullMarked;
