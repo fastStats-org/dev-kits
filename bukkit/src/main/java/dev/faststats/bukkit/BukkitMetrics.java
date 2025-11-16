@@ -1,14 +1,14 @@
-package dev.faststats;
+package dev.faststats.bukkit;
 
 import com.google.gson.FormattingStyle;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import dev.faststats.chart.Chart;
+import dev.faststats.core.SimpleMetrics;
+import dev.faststats.core.chart.Chart;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.TestOnly;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-@NullMarked
 public class BukkitMetrics extends SimpleMetrics {
     private final Plugin plugin;
     private final String token;

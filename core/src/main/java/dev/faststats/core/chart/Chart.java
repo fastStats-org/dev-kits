@@ -1,4 +1,4 @@
-package dev.faststats.chart;
+package dev.faststats.core.chart;
 
 import com.google.gson.JsonElement;
 import org.jetbrains.annotations.Contract;

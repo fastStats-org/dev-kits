@@ -1,8 +1,8 @@
-package dev.faststats;
+package dev.faststats.core;
 
 import com.github.luben.zstd.Zstd;
 import com.google.gson.JsonObject;
-import dev.faststats.chart.Chart;
+import dev.faststats.core.chart.Chart;
 import org.jspecify.annotations.Nullable;
 
 import java.net.ConnectException;

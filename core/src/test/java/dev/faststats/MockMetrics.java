@@ -1,6 +1,7 @@
 package dev.faststats;
 
 import com.google.gson.JsonObject;
+import dev.faststats.core.SimpleMetrics;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 

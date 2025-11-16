@@ -1,4 +1,4 @@
-package dev.faststats.chart;
+package dev.faststats.core.chart;
 
 import org.intellij.lang.annotations.Pattern;
 

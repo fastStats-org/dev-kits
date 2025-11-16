@@ -1,13 +1,13 @@
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-module dev.faststats.core {
-    exports dev.faststats.core.chart;
-    exports dev.faststats.core;
+module dev.faststats.bukkit {
+    exports dev.faststats.bukkit;
 
-    requires com.github.luben.zstd_jni;
     requires com.google.gson;
-    requires java.net.http;
+    requires dev.faststats.core;
+    requires java.logging;
+    requires org.bukkit;
 
     requires static org.jetbrains.annotations;
     requires static org.jspecify;
