@@ -5,50 +5,35 @@ import dev.faststats.core.SimpleMetrics;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.net.URI;
+import java.util.Set;
 import java.util.UUID;
 
 @NullMarked
 public class MockMetrics extends SimpleMetrics {
-    private final UUID serverId;
-    private final String token;
-    
-    public MockMetrics(UUID serverId, String token) {
-        this.serverId = serverId;
-        this.token = token;
-    }    
+    public MockMetrics(UUID serverId, String token, boolean debug) {
+        super(new SimpleMetrics.Config(serverId, true, debug), Set.of(), token, URI.create("http://localhost:5000"), debug);
+    }
+
     @Override
     protected void error(String message, @Nullable Throwable throwable) {
+        if (!isDebug()) return;
         System.err.println(message);
         if (throwable != null) throwable.printStackTrace(System.err);
     }
 
     @Override
     protected void warn(String message) {
-        System.out.println(message);
+        if (isDebug()) System.out.println(message);
     }
 
     @Override
     protected void info(String message) {
-        System.out.println(message);
+        if (isDebug()) System.out.println(message);
     }
 
     @Override
     public JsonObject createData() {
         return super.createData();
-    }
-
-    @Override
-    protected UUID getServerId() {
-        return serverId;
-    }
-
-    @Override
-    protected boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public String getToken() {
-        return token;
     }
 }
