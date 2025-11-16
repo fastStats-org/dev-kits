@@ -32,7 +32,6 @@ public class BukkitMetrics extends SimpleMetrics {
     private final boolean enabled;
     private final boolean onlineMode;
 
-    @SuppressWarnings("deprecation")
     public BukkitMetrics(Plugin plugin, String token) throws IOException {
         var dataFolder = plugin.getServer().getPluginsFolder().toPath().resolve("faststats");
         var config = dataFolder.resolve("config.json");
@@ -47,17 +46,10 @@ public class BukkitMetrics extends SimpleMetrics {
         this.onlineMode = checkOnlineMode();
 
         this.token = token;
-
-        addChart(Chart.pie("online_mode", () -> String.valueOf(onlineMode)));
-        addChart(Chart.pie("plugin_version", () -> plugin.getDescription().getVersion()));
-        addChart(Chart.pie("server_type", () -> plugin.getServer().getName()));
-        addChart(Chart.pie("minecraft_version", () -> plugin.getServer().getMinecraftVersion()));
-        addChart(Chart.line("player_count", () -> plugin.getServer().getOnlinePlayers().size()));
-        startSubmitting();
+        setup();
     }
 
     @TestOnly
-    @SuppressWarnings("deprecation")
     public BukkitMetrics(Plugin plugin, String token, UUID serverId, boolean enabled, boolean debug) {
         this.serverId = serverId;
         this.enabled = enabled;
@@ -67,12 +59,19 @@ public class BukkitMetrics extends SimpleMetrics {
         this.onlineMode = checkOnlineMode();
 
         this.token = token;
+        setup();
+    }
 
-        addChart(Chart.pie("online_mode", () -> String.valueOf(onlineMode)));
-        addChart(Chart.pie("plugin_version", () -> plugin.getDescription().getVersion()));
-        addChart(Chart.pie("server_type", () -> plugin.getServer().getName()));
-        addChart(Chart.pie("minecraft_version", () -> plugin.getServer().getMinecraftVersion()));
-        addChart(Chart.line("player_count", () -> plugin.getServer().getOnlinePlayers().size()));
+    @SuppressWarnings("deprecation")
+    protected void setup() {
+        addChart(Chart.bool("online_mode", () -> onlineMode));
+        addChart(Chart.string("plugin_version", () -> plugin.getDescription().getVersion()));
+        addChart(Chart.string("server_type", () -> plugin.getServer().getName()));
+        addChart(Chart.string("minecraft_version", () -> plugin.getServer().getMinecraftVersion()));
+        addChart(Chart.number("player_count", () -> {
+            var size = plugin.getServer().getOnlinePlayers().size();
+            return size != 0 ? size : null;
+        }));
         startSubmitting();
     }
 
@@ -155,7 +154,7 @@ public class BukkitMetrics extends SimpleMetrics {
     public String getToken() {
         return token;
     }
-    
+
     private <T> Optional<T> tryOrEmpty(Supplier<@Nullable T> supplier) {
         try {
             return Optional.ofNullable(supplier.get());
