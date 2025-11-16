@@ -2,6 +2,7 @@ package org.faststats;
 
 import com.google.gson.JsonObject;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -15,9 +16,14 @@ public class MockMetrics extends SimpleMetrics {
         this.token = token;
     }    
     @Override
-    protected void error(String message, Throwable throwable) {
+    protected void error(String message, @Nullable Throwable throwable) {
         System.err.println(message);
-        throwable.printStackTrace(System.err);
+        if (throwable != null) throwable.printStackTrace(System.err);
+    }
+
+    @Override
+    protected void warn(String message) {
+        System.out.println(message);
     }
 
     @Override
