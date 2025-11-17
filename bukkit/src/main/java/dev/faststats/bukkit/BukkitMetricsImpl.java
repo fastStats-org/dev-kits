@@ -31,7 +31,6 @@ final class BukkitMetricsImpl extends SimpleMetrics implements BukkitMetrics {
         startSubmitting();
     }
 
-    @Contract(mutates = "param")
     @SuppressWarnings("deprecation")
     private void setup(SimpleMetrics.Factory factory, Plugin plugin) throws IllegalArgumentException {
         var pluginVersion = tryOrEmpty(() -> plugin.getPluginMeta().getVersion())
