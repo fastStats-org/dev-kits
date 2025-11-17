@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +51,7 @@ public abstract class SimpleMetrics implements Metrics {
     protected SimpleMetrics(SimpleMetrics.Factory factory, Path config) throws IOException, IllegalStateException {
         if (factory.token == null) throw new IllegalStateException("Token must be specified");
 
-        this.charts = Set.copyOf(factory.charts);
+        this.charts = new CopyOnWriteArraySet<>(factory.charts);
         this.config = new Config(config);
         this.debug = factory.debug;
         this.token = factory.token;
@@ -59,11 +60,15 @@ public abstract class SimpleMetrics implements Metrics {
 
     @VisibleForTesting
     protected SimpleMetrics(Config config, Set<Chart<?>> charts, @Token String token, URI url, boolean debug) {
-        this.charts = Set.copyOf(charts);
+        this.charts = new CopyOnWriteArraySet<>(charts);
         this.config = config;
         this.debug = debug;
         this.token = token;
         this.url = url;
+    }
+
+    protected void addChart(Chart<?> chart) throws IllegalArgumentException {
+        if (!charts.add(chart)) throw new IllegalArgumentException("Chart already added: " + chart.getId());
     }
 
     @Async.Schedule
