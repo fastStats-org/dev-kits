@@ -194,7 +194,7 @@ public abstract class SimpleMetrics implements Metrics {
 
     public abstract static class Factory implements Metrics.Factory {
         private final Set<Chart<?>> charts = new HashSet<>(0);
-        private URI url = URI.create("https://api.faststats.dev/v1/metrics");
+        private URI url = URI.create("https://metrics.faststats.dev/v1/collect");
         private @Nullable String token;
         private boolean debug = false;
 
