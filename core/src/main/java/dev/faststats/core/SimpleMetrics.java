@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import dev.faststats.core.chart.Chart;
 import org.jetbrains.annotations.Async;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.jspecify.annotations.Nullable;
@@ -29,7 +30,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -48,10 +48,10 @@ public abstract class SimpleMetrics implements Metrics {
     private final boolean debug;
 
     @SuppressWarnings("PatternValidation")
-    protected SimpleMetrics(SimpleMetrics.Factory factory, Path config) throws IOException, IllegalStateException {
+    protected SimpleMetrics(SimpleMetrics.Factory<?> factory, Path config) throws IOException, IllegalStateException {
         if (factory.token == null) throw new IllegalStateException("Token must be specified");
 
-        this.charts = new CopyOnWriteArraySet<>(factory.charts);
+        this.charts = Set.copyOf(factory.charts);
         this.config = new Config(config);
         this.debug = factory.debug;
         this.token = factory.token;
@@ -60,15 +60,11 @@ public abstract class SimpleMetrics implements Metrics {
 
     @VisibleForTesting
     protected SimpleMetrics(Config config, Set<Chart<?>> charts, @Token String token, URI url, boolean debug) {
-        this.charts = new CopyOnWriteArraySet<>(charts);
+        this.charts = Set.copyOf(charts);
         this.config = config;
         this.debug = debug;
         this.token = token;
         this.url = url;
-    }
-
-    protected void addChart(Chart<?> chart) throws IllegalArgumentException {
-        if (!charts.add(chart)) throw new IllegalArgumentException("Chart already added: " + chart.getId());
     }
 
     @Async.Schedule
@@ -158,6 +154,8 @@ public abstract class SimpleMetrics implements Metrics {
                 error("Failed to build chart data: " + chart.getId(), e);
             }
         });
+        
+        appendDefaultData(charts);
 
         data.addProperty("server_id", config.serverId().toString());
         data.add("data", charts);
@@ -178,6 +176,9 @@ public abstract class SimpleMetrics implements Metrics {
         return debug || config.debug();
     }
 
+    @Contract(mutates = "param1")
+    protected abstract void appendDefaultData(JsonObject charts);
+
     protected abstract void error(String message, @Nullable Throwable throwable);
 
     protected abstract void warn(String message);
@@ -192,26 +193,26 @@ public abstract class SimpleMetrics implements Metrics {
         executor = null;
     }
 
-    public abstract static class Factory implements Metrics.Factory {
+    public abstract static class Factory<T> implements Metrics.Factory<T> {
         private final Set<Chart<?>> charts = new HashSet<>(0);
         private URI url = URI.create("https://metrics.faststats.dev/v1/collect");
         private @Nullable String token;
         private boolean debug = false;
 
         @Override
-        public Metrics.Factory addChart(Chart<?> chart) throws IllegalArgumentException {
+        public Metrics.Factory<T> addChart(Chart<?> chart) throws IllegalArgumentException {
             if (!charts.add(chart)) throw new IllegalArgumentException("Chart already added: " + chart.getId());
             return this;
         }
 
         @Override
-        public Metrics.Factory debug(boolean enabled) {
+        public Metrics.Factory<T> debug(boolean enabled) {
             this.debug = enabled;
             return this;
         }
 
         @Override
-        public Metrics.Factory token(@Token String token) throws IllegalArgumentException {
+        public Metrics.Factory<T> token(@Token String token) throws IllegalArgumentException {
             if (!token.matches(Token.PATTERN)) {
                 throw new IllegalArgumentException("Invalid token '" + token + "', must match '" + Token.PATTERN + "'");
             }
@@ -220,7 +221,7 @@ public abstract class SimpleMetrics implements Metrics {
         }
 
         @Override
-        public Metrics.Factory url(URI url) {
+        public Metrics.Factory<T> url(URI url) {
             this.url = url;
             return this;
         }

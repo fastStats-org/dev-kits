@@ -2,6 +2,7 @@ package dev.faststats;
 
 import com.google.gson.JsonObject;
 import dev.faststats.core.SimpleMetrics;
+import dev.faststats.core.Token;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 @NullMarked
 public class MockMetrics extends SimpleMetrics {
-    public MockMetrics(UUID serverId, String token, boolean debug) {
+    public MockMetrics(UUID serverId, @Token String token, boolean debug) {
         super(new SimpleMetrics.Config(serverId, true, debug), Set.of(), token, URI.create("http://localhost:5000"), debug);
     }
 
@@ -35,5 +36,9 @@ public class MockMetrics extends SimpleMetrics {
     @Override
     public JsonObject createData() {
         return super.createData();
+    }
+
+    @Override
+    protected void appendDefaultData(JsonObject charts) {
     }
 }

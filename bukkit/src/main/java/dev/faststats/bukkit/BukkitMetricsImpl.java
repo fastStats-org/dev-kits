@@ -1,12 +1,11 @@
 package dev.faststats.bukkit;
 
+import com.google.gson.JsonObject;
 import dev.faststats.core.Metrics;
 import dev.faststats.core.SimpleMetrics;
-import dev.faststats.core.chart.Chart;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Async;
-import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -20,33 +19,16 @@ import java.util.logging.Logger;
 final class BukkitMetricsImpl extends SimpleMetrics implements BukkitMetrics {
     private final Logger logger;
     private final Server server;
+    private final Plugin plugin;
 
-    private BukkitMetricsImpl(SimpleMetrics.Factory factory, Plugin plugin, Path config) throws IOException, IllegalStateException {
+    private BukkitMetricsImpl(SimpleMetrics.Factory<?> factory, Plugin plugin, Path config) throws IOException, IllegalStateException {
         super(factory, config);
 
         this.logger = plugin.getLogger();
         this.server = plugin.getServer();
+        this.plugin = plugin;
 
-        setup(factory, plugin);
         startSubmitting();
-    }
-
-    @SuppressWarnings("deprecation")
-    private void setup(SimpleMetrics.Factory factory, Plugin plugin) throws IllegalArgumentException {
-        var pluginVersion = tryOrEmpty(() -> plugin.getPluginMeta().getVersion())
-                .orElseGet(() -> plugin.getDescription().getVersion());
-        var minecraftVersion = tryOrEmpty(server::getMinecraftVersion)
-                .orElse("unknown"); // fixme: bukkit compat
-        var onlineMode = checkOnlineMode();
-
-        addChart(Chart.bool("online_mode", () -> onlineMode));
-        addChart(Chart.string("plugin_version", () -> pluginVersion));
-        addChart(Chart.string("server_type", server::getName));
-        addChart(Chart.string("minecraft_version", () -> minecraftVersion));
-        addChart(Chart.number("player_count", () -> {
-            var size = server.getOnlinePlayers().size();
-            return size != 0 ? size : null;
-        }));
     }
 
     @Async.Schedule
@@ -71,6 +53,22 @@ final class BukkitMetricsImpl extends SimpleMetrics implements BukkitMetrics {
         if (settings == null) return false;
 
         return settings.getBoolean("bungeecord") && proxies.getBoolean("bungee-cord.online-mode");
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected void appendDefaultData(JsonObject charts) {
+        var pluginVersion = tryOrEmpty(() -> plugin.getPluginMeta().getVersion())
+                .orElseGet(() -> plugin.getDescription().getVersion());
+        var minecraftVersion = tryOrEmpty(server::getMinecraftVersion)
+                .orElse("unknown"); // fixme: bukkit compat
+        var players = server.getOnlinePlayers().size();
+
+        charts.addProperty("online_mode", checkOnlineMode());
+        charts.addProperty("plugin_version", pluginVersion);
+        charts.addProperty("server_type", server.getName());
+        charts.addProperty("minecraft_version", minecraftVersion);
+        if (players != 0) charts.addProperty("player_count", players);
     }
 
     @Override
@@ -103,17 +101,11 @@ final class BukkitMetricsImpl extends SimpleMetrics implements BukkitMetrics {
         }
     }
 
-    static final class Factory extends SimpleMetrics.Factory {
-        private final Plugin plugin;
-        private final Path config;
-
-        public Factory(Plugin plugin, Path config) {
-            this.plugin = plugin;
-            this.config = config;
-        }
-
+    static final class Factory extends SimpleMetrics.Factory<Plugin> {
         @Override
-        public Metrics create() throws IOException, IllegalStateException {
+        public Metrics create(Plugin plugin) throws IOException, IllegalStateException {
+            var dataFolder = plugin.getServer().getPluginsFolder().toPath().resolve("faststats");
+            var config = dataFolder.resolve("config.json");
             return new BukkitMetricsImpl(this, plugin, config);
         }
     }

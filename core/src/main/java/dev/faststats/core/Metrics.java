@@ -48,7 +48,7 @@ public interface Metrics {
      *
      * @since 0.1.0
      */
-    interface Factory {
+    interface Factory<T> {
         /**
          * Adds a chart to the metrics submission.
          *
@@ -58,7 +58,7 @@ public interface Metrics {
          * @since 0.1.0
          */
         @Contract(mutates = "this")
-        Factory addChart(Chart<?> chart) throws IllegalArgumentException;
+        Factory<T> addChart(Chart<?> chart) throws IllegalArgumentException;
 
         /**
          * Enables or disabled debug mode for this metrics instance.
@@ -73,7 +73,7 @@ public interface Metrics {
          * @since 0.1.0
          */
         @Contract(mutates = "this")
-        Factory debug(boolean enabled);
+        Factory<T> debug(boolean enabled);
 
         /**
          * Sets the token used to authenticate with the metrics server and identify the project.
@@ -86,7 +86,7 @@ public interface Metrics {
          * @since 0.1.0
          */
         @Contract(mutates = "this")
-        Factory token(@Token String token) throws IllegalArgumentException;
+        Factory<T> token(@Token String token) throws IllegalArgumentException;
 
         /**
          * Sets the metrics server URL.
@@ -98,22 +98,24 @@ public interface Metrics {
          * @since 0.1.0
          */
         @Contract(mutates = "this")
-        Factory url(URI url);
+        Factory<T> url(URI url);
 
         /**
          * Creates a new metrics instance.
          * <p>
          * Metrics submission will start automatically.
          *
+         * @param plugin the plugin instance
          * @return the metrics instance
-         * @throws IOException           if the config file cannot be read or written
-         * @throws IllegalStateException if the token is not specified
+         * @throws IOException              if the config file cannot be read or written
+         * @throws IllegalStateException    if the token is not specified
+         * @throws IllegalArgumentException if the given object is not a valid plugin
          * @see #token(String)
          * @since 0.1.0
          */
         @Async.Schedule
-        @Contract(value = " -> new", mutates = "io")
-        Metrics create() throws IOException, IllegalStateException;
+        @Contract(value = "_ -> new", mutates = "io")
+        Metrics create(T plugin) throws IOException, IllegalStateException, IllegalArgumentException;
     }
 
     /**
