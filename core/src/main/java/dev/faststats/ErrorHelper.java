@@ -11,6 +11,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -154,29 +155,37 @@ final class ErrorHelper {
         return result;
     }
 
-    public static boolean isSameLoader(final ClassLoader loader, final Throwable error) {
-        return isSameLoader(loader, error, Collections.newSetFromMap(new IdentityHashMap<>()));
+    public static boolean isSameLoader(final Thread thread, final ClassLoader loader, final Throwable error) {
+        return isSameLoader(thread, loader, error, Collections.newSetFromMap(new IdentityHashMap<>()));
     }
 
-    private static boolean isSameLoader(final ClassLoader loader, @Nullable final Throwable error, final Set<Throwable> visited) {
+    private static boolean isSameLoader(final Thread thread, final ClassLoader loader, @Nullable final Throwable error, final Set<Throwable> visited) {
         if (error == null || !visited.add(error)) return false;
 
         final var stackTrace = error.getStackTrace();
         if (stackTrace == null || stackTrace.length == 0)
-            return isSameLoader(loader, error.getCause(), visited);
+            return isSameLoader(thread, loader, error.getCause(), visited);
 
         final var firstNonLibraryIndex = findFirstNonLibraryFrameIndex(stackTrace);
-        if (firstNonLibraryIndex == -1) return isSameLoader(loader, error.getCause(), visited);
+        if (firstNonLibraryIndex == -1) return isSameLoader(thread, loader, error.getCause(), visited);
 
         final var framesToCheck = Math.min(5, stackTrace.length - firstNonLibraryIndex);
 
         for (var i = 0; i < framesToCheck; i++) {
             final var frame = stackTrace[firstNonLibraryIndex + i];
             if (isLibraryFrame(frame.getClassName())) continue;
-            if (!isFromLoader(frame, loader)) return isSameLoader(loader, error.getCause(), visited);
+            if (!isFromLoader(frame, loader)) return isSameLoader(thread, loader, error.getCause(), visited);
         }
 
-        return true;
+        return classLoadersMatch(thread.getContextClassLoader(), loader);
+    }
+
+    private static boolean classLoadersMatch(@Nullable final ClassLoader first, @Nullable final ClassLoader second) {
+        if (Objects.equals(first, second)) return true;
+        if (first == null || second == null) return false;
+        if (classLoadersMatch(first.getParent(), second)) return true;
+        if (classLoadersMatch(first, second.getParent())) return true;
+        return false;
     }
 
     private static int findFirstNonLibraryFrameIndex(final StackTraceElement[] stackTrace) {

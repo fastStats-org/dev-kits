@@ -15,14 +15,15 @@ import java.util.regex.Pattern;
  */
 public sealed interface ErrorTracker permits SimpleErrorTracker {
     /**
-     * Creates a context-aware error tracker policy.
+     * Creates a context-aware error tracker policy for the current class loader.
      *
      * @return the error tracker policy
+     * @see #contextAware(ClassLoader)
      * @since 0.24.0
      */
     @Contract(value = " -> new", pure = true)
     static ErrorTracker contextAware() {
-        return contextAware(ErrorTracker.class.getClassLoader());
+        return contextAware(Thread.currentThread().getContextClassLoader());
     }
 
     /**
@@ -256,6 +257,20 @@ public sealed interface ErrorTracker permits SimpleErrorTracker {
      */
     @Contract(pure = true)
     static boolean isSameLoader(final ClassLoader loader, final Throwable error) {
-        return ErrorHelper.isSameLoader(loader, error);
+        return ErrorHelper.isSameLoader(Thread.currentThread(), loader, error);
+    }
+
+    /**
+     * Checks if the error occurred in the same class loader as the provided loader and thread.
+     *
+     * @param thread the thread
+     * @param loader the class loader
+     * @param error  the error
+     * @return whether the error occurred in the same class loader
+     * @since 0.23.0
+     */
+    @Contract(pure = true)
+    static boolean isSameLoader(final Thread thread, final ClassLoader loader, final Throwable error) {
+        return ErrorHelper.isSameLoader(thread, loader, error);
     }
 }    
